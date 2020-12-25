@@ -11,5 +11,11 @@ Run the installation script using `./install.sh`
 
 This will automatically install lbsaver and set up one click install for you.
 
+### Configuration
+
+The default path to the beat saber installation is `~/.steam/debian-installation/steamapps/common/Beat Saber/`.
+
+If you installed it elsewhere you can change it with `lbsaver --set-path /path/to/Beat Saber`
+
 ### Usage
-You can use one-click install or manually run it in the commandline with `lbsaver [uri]`
+You can use one-click install or manually run it in the commandline with `lbsaver [uri]` e.g `lbsaver beatsaver://dce`
