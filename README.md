@@ -1,5 +1,5 @@
 # lbsaver
-A small application to automatically install beat saber mods from beatsaver on linux. Supports one-click map installation.
+A small application to automatically install beat saber maps from beatsaver on linux. Supports one-click map installation.
 
 ### Prerequisites
 Install rustup from https://rustup.rs
