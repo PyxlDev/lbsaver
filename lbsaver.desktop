@@ -1,0 +1,7 @@
+[Desktop Entry]
+Type=Application
+Name=lbsaver
+Exec=lbsaver %u
+StartupNotify=false
+NoDisplay=true
+MimeType=x-scheme-handler/beatsaver;
