@@ -1,27 +1,50 @@
 use core::panic;
-use std::{io::Cursor, convert::TryInto, path::Path};
+use std::{convert::TryInto, io::Cursor, path::{Path, PathBuf}};
 
 use hyper::http::{
 	Uri,
 };
-use beatsaver_rs::{BeatSaverApi, MapId, client::BeatSaver, map::Map};
-use tokio::io::{AsyncWrite, AsyncWriteExt};
+use beatsaver_rs::{BeatSaverApi, client::BeatSaver};
 use zip::ZipArchive;
 
-const BEAT_SABER_INSTALLATION: &str = ".steam/debian-installation/steamapps/common/Beat Saber/";
 const CUSTOM_SONGS_FOLDER: &str = "Beat Saber_Data/CustomLevels";
+
+#[derive(Debug, Clone, serde::Serialize, serde::Deserialize)]
+struct Config {
+	path: PathBuf
+}
+impl Default for Config {
+	fn default() -> Self {
+		 Config {
+			 path: get_default_installation_path()
+		 }
+	}
+}
 
 #[tokio::main]
 async fn main() {
-	let link = std::env::args().last().expect("Expected URI to Asset");
-	let beat_saver = BeatSaver::new();
-	install_asset(&beat_saver, &link).await;
+	match &*std::env::args().nth(1).expect("Expected Argument") {
+		"--set-path" | "-p" => {
+			let path = match std::env::args().nth(2) {
+				Some(path) => PathBuf::from(path),
+				None => get_default_installation_path(),
+			};
+			println!("setting path to {:?}", path);
+			let mut config: Config = confy::load("lbsaver").unwrap();
+			config.path = path;
+			confy::store("lbsaver", config).unwrap();
+		}
+		_ => {
+			let link = std::env::args().last().expect("Expected URI to Asset");
+			let beat_saver = BeatSaver::new();
+			install_asset(&beat_saver, &link).await;
+		}
+	}
 }
 
 async fn install_asset(beat_s: &BeatSaver, link: &str) {
 
-	let home_str = std::env::var("HOME").unwrap();
-	let home = Path::new(&home_str);
+	let config = get_config();
 
 	let uri: Uri = link.parse().expect("Invalid URI");
 	match uri.scheme_str().expect("Invalid URI") {
@@ -35,7 +58,7 @@ async fn install_asset(beat_s: &BeatSaver, link: &str) {
 
 			let map_download = beat_s.download(map_id.clone()).await.unwrap();
 			
-			let song_path = home.join(Path::new(BEAT_SABER_INSTALLATION)).join(&Path::new(CUSTOM_SONGS_FOLDER));
+			let song_path = config.path.join(&Path::new(CUSTOM_SONGS_FOLDER));
 			let dir = song_path.join(map_name);
 			println!("Downloading");
 
@@ -55,4 +78,14 @@ async fn install_asset(beat_s: &BeatSaver, link: &str) {
 		}
 		_ => panic!("Invalid URI scheme. Currently only beatsaver is supported")
 	}
+}
+
+fn get_default_installation_path() -> PathBuf {
+	let home_str = std::env::var("HOME").unwrap();
+	let home = Path::new(&home_str);
+	let relative = Path::new(".steam/debian-installation/steamapps/common/Beat Saber/");
+	home.join(relative)
+}
+fn get_config() -> Config {
+	confy::load("lbsaver").unwrap()
 }
