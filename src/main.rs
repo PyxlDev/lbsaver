@@ -83,7 +83,7 @@ async fn install_asset(beat_s: &BeatSaver, link: &str) {
 fn get_default_installation_path() -> PathBuf {
 	let home_str = std::env::var("HOME").unwrap();
 	let home = Path::new(&home_str);
-	let relative = Path::new(".steam/debian-installation/steamapps/common/Beat Saber/");
+	let relative = Path::new(".steam/steam/steamapps/common/Beat Saber/");
 	home.join(relative)
 }
 fn get_config() -> Config {

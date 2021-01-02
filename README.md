@@ -13,7 +13,7 @@ This will automatically install lbsaver and set up one click install for you.
 
 ### Configuration
 
-The default path to the beat saber installation is `~/.steam/debian-installation/steamapps/common/Beat Saber/`.
+The default path to the beat saber installation is `~/.steam/steam/steamapps/common/Beat Saber/`.
 
 If you installed it elsewhere you can change it with `lbsaver --set-path /path/to/Beat Saber`
 
