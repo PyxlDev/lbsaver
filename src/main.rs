@@ -5,6 +5,7 @@ use hyper::http::{
 	Uri,
 };
 use beatsaver_rs::{BeatSaverApi, client::BeatSaver};
+use tokio::join;
 use zip::ZipArchive;
 
 const CUSTOM_SONGS_FOLDER: &str = "Beat Saber_Data/CustomLevels";
@@ -52,15 +53,21 @@ async fn install_asset(beat_s: &BeatSaver, link: &str) {
 			println!("Installing beatsaver asset");
 			let asset = uri.host().unwrap();
 			let map_id = &asset.try_into().unwrap();
-			let map = beat_s.map(map_id).await.expect("Error getting map data");
+
+
+			println!("Downloading");
+			let map = beat_s.map(map_id);
+			let map_download = beat_s.download(map_id.clone());
+
+			let (map, map_download) = join!(map, map_download);
+			let map = map.expect("Error getting map data");
+			let map_download = map_download.expect("Error downloading map");
+
 			let map_name = format!("{} ({} - {})", map.key, map.name, map.metadata.level_author);
 			println!("Map: {}", map_name);
 
-			let map_download = beat_s.download(map_id.clone()).await.unwrap();
-			
 			let song_path = config.path.join(&Path::new(CUSTOM_SONGS_FOLDER));
 			let dir = song_path.join(map_name);
-			println!("Downloading");
 
 			println!("Saving map to: {:?}", dir);
 			match tokio::fs::create_dir(dir.clone()).await {
